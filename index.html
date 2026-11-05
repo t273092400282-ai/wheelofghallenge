@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>عجلة التحدي والتعلم - الصف العاشر</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-light: #38bdf8;
+      --secondary: #d97706;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 14px;
+      text-align: center;
+    }
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 1.45rem;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      color: #fbbf24;
+    }
+    p {
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+    }
+    .text-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: right;
+      margin-bottom: 14px;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    .rules-list {
+      text-align: right;
+      width: 100%;
+      margin-bottom: 18px;
+      list-style-type: none;
+    }
+    .rules-list li {
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border-right: 4px solid #38bdf8;
+      font-size: 0.88rem;
+    }
+    .btn {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      border: none;
+      padding: 14px 24px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 320px;
+      display: inline-block;
+      box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+      touch-action: manipulation;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      box-shadow: none;
+      margin-top: 10px;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    .stat-val {
+      color: #38bdf8;
+      font-size: 1.05rem;
+    }
+    .wheel-outer-wrap {
+      position: relative;
+      width: 82vw;
+      max-width: 330px;
+      height: 82vw;
+      max-height: 330px;
+      margin: 8px auto 16px auto;
+    }
+    #wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      display: block;
+    }
+    .pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 26px solid #ef4444;
+      z-index: 10;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+    .spin-center-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #f59e0b, #b45309);
+      border: 3px solid #fff;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(0,0,0,0.5);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .spin-center-btn:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    .spin-center-btn:disabled {
+      background: #475569;
+      border-color: #64748b;
+      cursor: not-allowed;
+    }
+    .quiz-box {
+      width: 100%;
+      text-align: right;
+    }
+    .q-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .q-title {
+      font-size: 1.05rem;
+      margin-bottom: 14px;
+      line-height: 1.5;
+      color: #f1f5f9;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+      width: 100%;
+    }
+    .opt-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 12px;
+      color: #f8fafc;
+      text-align: right;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      line-height: 1.4;
+      touch-action: manipulation;
+    }
+    .opt-btn.correct {
+      background: rgba(22, 163, 74, 0.3) !important;
+      border-color: var(--success) !important;
+      color: #4ade80 !important;
+    }
+    .opt-btn.wrong {
+      background: rgba(220, 38, 38, 0.3) !important;
+      border-color: var(--danger) !important;
+      color: #f87171 !important;
+    }
+    .opt-btn:disabled {
+      cursor: default;
+    }
+    .opt-idx {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .feedback-box {
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .feedback-box.correct {
+      background: rgba(22, 163, 74, 0.2);
+      border: 1px solid var(--success);
+      color: #86efac;
+    }
+    .feedback-box.wrong {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+    }
+    .result-score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2563eb, #1e3a8a);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 14px auto;
+      border: 3px solid #38bdf8;
+    }
+    .score-big {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .score-total {
+      font-size: 0.85rem;
+      color: #93c5fd;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      width: 100%;
+      margin: 14px 0;
+    }
+    .summary-card {
+      background: rgba(0,0,0,0.25);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .summary-val {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Start -->
+  <div id="startScreen" class="screen active">
+    <h1>🎡 مسابقة عجلة الإتقان واللغة</h1>
+    <h2>التطبيق الخارجي - لغة عربية - الصف العاشر</h2>
+    
+    <div class="text-box">
+      <h3 style="color: #38bdf8; margin-bottom: 6px;">📖 نبذة الدرس وسياق النص:</h3>
+      <p style="margin-bottom: 0;">
+        يدور النص حول مكانة الوطن وتضحيات الأجداد في ركوب البحر وصمودهم في الصحراء، موظفاً الرموز البيئية والصور البلاغية ودلالات الأفعال.
+      </p>
+    </div>
+
+    <ul class="rules-list">
+      <li>🎯 <strong>العجلة الذكية:</strong> السؤال الذي تجيب عليه يُستبعد تلقائياً ولا يتكرر.</li>
+      <li>🔀 <strong>عشوائية الخيارات:</strong> موضع الإجابة الصحيحة متغير في كل مرة.</li>
+      <li>🏆 <strong>نظام النقاط:</strong> 100 نقطة لكل إجابة صائبة مع مكافأة السرعة والسلسلة.</li>
+      <li>⚡ <strong>لكل الأجهزة:</strong> تعمل بنقرة واحدة على الآيفون، الأندرويد، اللابتوب، والشاشات الذكية بدون إنترنت.</li>
+    </ul>
+
+    <button class="btn" id="startBtn">🚀 ابدأ التحدي الآن</button>
+  </div>
+
+  <!-- Screen 2: Game -->
+  <div id="gameScreen" class="screen">
+    <div class="top-bar">
+      <div>النقاط: <span id="scoreVal" class="stat-val">0</span></div>
+      <div>المتبقي: <span id="remainVal" class="stat-val">13</span></div>
+      <div>السلسلة: <span id="streakVal" class="stat-val">0 🔥</span></div>
+    </div>
+
+    <div id="wheelContainer" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+      <h4 style="color: #cbd5e1; margin-bottom: 6px; font-size: 0.9rem;">المس "تـدوير" لاختيار السؤال</h4>
+      <div class="wheel-outer-wrap">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas" width="330" height="330"></canvas>
+        <button id="spinBtn" class="spin-center-btn">تدوير</button>
+      </div>
+    </div>
+
+    <div id="quizContainer" class="quiz-box" style="display: none;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="q-badge" id="qCategory">البلاغة والفهم</span>
+        <span style="color:#fbbf24; font-weight:bold; font-size:0.9rem;" id="timerBadge">⏱️ 35 ثانية</span>
+      </div>
+      <h3 class="q-title" id="questionText">نص السؤال...</h3>
+      <div class="options-grid" id="optionsGrid"></div>
+      <div id="feedbackBox" class="feedback-box" style="display: none;"></div>
+      <div style="text-align: center; margin-top: 14px;">
+        <button id="nextBtn" class="btn" style="display: none;">السؤال التالي ⬅️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: End -->
+  <div id="endScreen" class="screen">
+    <h1>🎉 أتممت التحدي بنجاح!</h1>
+    <h2 id="finalPraise">مستوى رائع!</h2>
+    <div class="result-score-circle">
+      <span class="score-big" id="finalScore">0</span>
+      <span class="score-total">نقطة</span>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div style="color: #94a3b8; font-size: 0.8rem;">الصحيحة</div>
+        <div class="summary-val" style="color: #4ade80;" id="correctCount">0</div>
+      </div>
+      <div class="summary-card">
+        <div style="color: #94a3b8; font-size: 0.8rem;">الخاطئة</div>
+        <div class="summary-val" style="color: #f87171;" id="wrongCount">0</div>
+      </div>
+      <div class="summary-card">
+        <div style="color: #94a3b8; font-size: 0.8rem;">الإتقان</div>
+        <div class="summary-val" style="color: #38bdf8;" id="accuracyPct">0%</div>
+      </div>
+    </div>
+    <button class="btn" id="restartBtn">🔄 إعادة اللعب</button>
+  </div>
+
+  <script>
+    // Universal safe Web Audio API for iOS / Android / Desktop
+    let audioCtx = null;
+    function unlockAudio() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) {
+          audioCtx = new AudioClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration) {
+      try {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundCorrect() {
+      playTone(523.25, 'triangle', 0.12);
+      setTimeout(() => playTone(659.25, 'triangle', 0.18), 100);
+      setTimeout(() => playTone(783.99, 'triangle', 0.25), 200);
+    }
+
+    function soundWrong() {
+      playTone(260, 'sawtooth', 0.16);
+      setTimeout(() => playTone(180, 'sawtooth', 0.25), 140);
+    }
+
+    function soundClick() {
+      playTone(650, 'sine', 0.03);
+    }
+
+    const fullQuestions = [
+      {
+        id: 1,
+        title: "ضع خطاً تحت المكمل الصحيح: الفكرة الرئيسة للنص السابق هي:",
+        category: "الفهم والاستيعاب",
+        options: [
+          { text: "عظمة الوطن لا تقدرها حدوده، بل جهود أبنائه وأثره الذي يتجاوزه.", correct: true },
+          { text: "مكانة الوطن بجغرافيته المميزة، وما يقدمه لأبنائه من خدمات.", correct: false },
+          { text: "قيمة الوطن بكثرة موارده الطبيعية، وحسن استثمار أبنائه لها.", correct: false },
+          { text: "رفعة الوطن ليست بكثرة موارده البشرية، بل بحسن توظيفها لخدمته.", correct: false }
+        ],
+        explanation: "الفكرة الرئيسة المعتمدة: عظمة الوطن لا تقدرها حدوده، بل جهود أبنائه وأثره الذي يتجاوزه."
+      },
+      {
+        id: 2,
+        title: "استخلص الشعور البارز في النص السابق مبيناً دواعيه:",
+        category: "المشاعر والوجدان",
+        options: [
+          { text: "الشعور: الفخر الشديد والاعتزاز بأرض الكويت | الدواعي: تضحيات رجال الوطن القدامى وركوبهم البحر وصمودهم.", correct: true },
+          { text: "الشعور: الحزن والأسى | الدواعي: قسوة البيئة الصحراوية وفقدان الأجداد.", correct: false },
+          { text: "الشعور: الدهشة والتعجب | الدواعي: اتساع حدود الوطن الجغرافية وكثرة موارده.", correct: false },
+          { text: "الشعور: الخوف والحذر | الدواعي: أخطار ركوب البحر والظلمات المتراكمة.", correct: false }
+        ],
+        explanation: "الشعور: الفخر الشديد والاعتزاز بأرض الكويت، ودواعيه: تضحيات رجال الوطن وركوبهم البحر الوعر وصمودهم."
+      },
+      {
+        id: 3,
+        title: "ما دلالة توظيف الشاعر لعنصر (النجوم) في سياق النص الشعري؟",
+        category: "توظيف عناصر البيئة",
+        options: [
+          { text: "رمز للهداية، والرفعة، والضوء الساطع الذي يهتدي به السارون ليلاً.", correct: true },
+          { text: "رمز للمصائب والخطوب والأزمات الحالكة المحيطة بالأمم.", correct: false },
+          { text: "رمز للبيئة القاسية الجرداء التي تحولت إلى بساتين.", correct: false },
+          { text: "رمز لضياع السائرين في البحر ومواجهة الأمواج العاتية.", correct: false }
+        ],
+        explanation: "النجوم: رمز للهداية والرفعة والضوء الساطع الذي يهتدي به السارون ليلاً."
+      },
+      {
+        id: 4,
+        title: "ما دلالة توظيف الشاعر لعنصر (الدجى) في سياق النص الشعري؟",
+        category: "توظيف عناصر البيئة",
+        options: [
+          { text: "رمز للمصائب والخطوب، والأزمات الحالكة المحيطة بالأمم والتي تساعد الكويت في محوها.", correct: true },
+          { text: "رمز للهدوء والسكينة والراحة بعد عناء السفر بالبحر.", correct: false },
+          { text: "رمز للهداية والرفعة والمكانة السامية العالية بين الأوطان.", correct: false },
+          { text: "رمز للأرض الجرداء الخالية من مظاهر العمران والحياة.", correct: false }
+        ],
+        explanation: "الدجى: رمز للمصائب والخطوب، والأزمات الحالكة المحيطة بالأمم والتي تساعد الكويت في محوها."
+      },
+      {
+        id: 5,
+        title: "ما دلالة توظيف عنصر (الصحراء) في سياق النص الشعري؟",
+        category: "توظيف عناصر البيئة",
+        options: [
+          { text: "رمز للبيئة القاسية الجرداء التي حولها رجال الكويت ببسالتهم إلى جنة وعمران.", correct: true },
+          { text: "رمز للأمل والضياء الذي يضيء طريق السائرين في العتمة.", correct: false },
+          { text: "رمز للاتساع الجغرافي الشاسع الذي لا حد له في بلادنا.", correct: false },
+          { text: "رمز لليأس والاستسلام أمام صعوبة الطبيعة وتقلباتها.", correct: false }
+        ],
+        explanation: "الصحراء: رمز للبيئة القاسية الجرداء التي حولها رجال الكويت ببسالتهم إلى جنة وعمران."
+      },
+      {
+        id: 6,
+        title: "ما شرح البيت السادس (إذا كانت الدنيا ظلاماً...) وغايته من ورائه؟",
+        category: "الشرح والتحليل",
+        options: [
+          { text: "الشرح: إذا امتلأت الحياة بالمشكلات فلا تكن جزءاً من الظلام بل كالبدر المضيء | الغاية: الحث على الإيجابية والمبادرة إلى فعل الخير.", correct: true },
+          { text: "الشرح: إن الظلام يغلب النور مهما اشتدت عزيمة الإنسان في الحياة | الغاية: التزام الحذر والابتعاد عن المخاطر.", correct: false },
+          { text: "الشرح: وصف جمال الليل المقمر في سماء الكويت | الغاية: التأمل في جمال الطبيعة الصحراوية.", correct: false },
+          { text: "الشرح: بيان كثرة الأزمات التي لا حل لها | الغاية: الصبر والانتظار حتى تنجلي الشدائد.", correct: false }
+        ],
+        explanation: "الشرح: إذا امتلأت الحياة بالمشكلات فلا تكن جزءاً من هذا الظلام بل كن كالبدر المضيء. الغاية: الحث على الإيجابية والمبادرة للخير."
+      },
+      {
+        id: 7,
+        title: "ما جمع كلمة 'سِفْر' (بكسر السين)، وما الجملة المناسبة لتوضيح معناها؟",
+        category: "الثروة اللغوية",
+        options: [
+          { text: "جمعها: أَسْفَار | الجملة: 'تزخرُ أسفارُ التاريخ الكويتي ببطولات أجدادنا العظام.'", correct: true },
+          { text: "جمعها: سُفَرَاء | الجملة: 'التقى سفراء الدول لمناقشة قضايا التنمية.'", correct: false },
+          { text: "جمعها: سُفُور | الجملة: 'السفر طريق لاكتساب الخبرات والمعارف.'", correct: false },
+          { text: "جمعها: مسافرون | الجملة: 'عاد المسافرون إلى أرض الوطن بسلام.'", correct: false }
+        ],
+        explanation: "جمع (سِفْر): أَسْفَار (بمعنى الكتب والمجلدات الكبيرة)، والجملة: تزخرُ أسفارُ التاريخ الكويتي ببطولات أجدادنا العظام."
+      },
+      {
+        id: 8,
+        title: "ما دلالة استخدام الفعل الناسخ 'أصبحت' وفق سياقه في النص؟",
+        category: "دلالات الألفاظ والأفعال",
+        options: [
+          { text: "إفادة التحول العظيم لسيادة السفر الكويتي في كل البحار.", correct: true },
+          { text: "إفادة الثبوت والجمود وعدم التغير عبر الزمن.", correct: false },
+          { text: "إفادة الشك والاحتمال في إمكانية تجاوز البحار.", correct: false },
+          { text: "إفادة طلوع الصباح وانقضاء ساعات الليل فقط.", correct: false }
+        ],
+        explanation: "الفعل الناسخ 'أصبحت': يفيد التحول العظيم لسيادة السفر الكويتي في كل البحار."
+      },
+      {
+        id: 9,
+        title: "ما دلالة استخدام الفعل الماضي 'تشبثت' وفق سياقه في النص؟",
+        category: "دلالات الألفاظ والأفعال",
+        options: [
+          { text: "إفادة التحقق والتمسك القوي غير القابل للتخلي.", correct: true },
+          { text: "إفادة التردد في اتخاذ القرار المناسب.", correct: false },
+          { text: "إفادة الزوال السريع للأشياء بمرور الأيام.", correct: false },
+          { text: "إفادة التجدد والاستمرار للمستقبل القريب.", correct: false }
+        ],
+        explanation: "الفعل الماضي 'تشبثت': يفيد التحقق والتمسك القوي غير القابل للتخلي."
+      },
+      {
+        id: 10,
+        title: "ما دلالة استخدام الفعل المضارع 'تروي' وفق سياقه في النص؟",
+        category: "دلالات الألفاظ والأفعال",
+        options: [
+          { text: "إفادة التجدد والاستمرار واستحضار صورة حكايات السور القديمة.", correct: true },
+          { text: "إفادة السقاية والري بالماء العذب بعد الجفاف.", correct: false },
+          { text: "إفادة انتهاء الأحداث وانقطاعها في الماضي البعيد.", correct: false },
+          { text: "إفادة الشك في صحة الروايات والأخبار المنقولة.", correct: false }
+        ],
+        explanation: "الفعل المضارع 'تروي': يفيد التجدد والاستمرار واستحضار صورة حكايات السور القديمة."
+      },
+      {
+        id: 11,
+        title: "التقويم البلاغي: وضح المعنى الذي أبرزته (الاستعارة) في: 'إذا كانت الدنيا ظلاماً'؟",
+        category: "التقويم والبلاغة",
+        options: [
+          { text: "تبرز البؤس والشدة في الدنيا وتجسد أثر المشكلات الصعبة.", correct: true },
+          { text: "تبرز جمال المساء وهدوء الحياة في الصحراء.", correct: false },
+          { text: "تبرز خوف الأجداد وترددهم في مواجهة الأزمات.", correct: false },
+          { text: "تبرز فخامة القصور واتساع أراضي الوطن.", correct: false }
+        ],
+        explanation: "الاستعارة في 'إذا كانت الدنيا ظلاماً': تبرز البؤس والشدة في الدنيا."
+      },
+      {
+        id: 12,
+        title: "التقويم البلاغي: وضح المعنى الذي أبرزه (التشبيه) في: 'ومن لم تكن في قلبه مثل نبضه'؟",
+        category: "التقويم والبلاغة",
+        options: [
+          { text: "يبرز قيمة الوطن وعظمته وأنه كالحياة للإنسان لا غنى عنه.", correct: true },
+          { text: "يبرز سرعة دقات القلب عند الخوف من البحر.", correct: false },
+          { text: "يبرز ضعف صحة الإنسان مع تقدم السنين.", correct: false },
+          { text: "يبرز ضرورة ممارسة الرياضة لتقوية نبضات القلب.", correct: false }
+        ],
+        explanation: "التشبيه في البيت الثامن (ومن لم تكن في قلبه مثل نبضه): يبرز قيمة الوطن وعظمته في حياة الإنسان."
+      },
+      {
+        id: 13,
+        title: "التقويم البلاغي: وضح المعنى الذي أبرزه (الطباق) في: (الصحراء - بلقع / البر - والبحر)؟",
+        category: "التقويم والبلاغة",
+        options: [
+          { text: "يبرز كفاح الأجداد ونضالهم وصمودهم في كل الميادين برّاً وبحراً.", correct: true },
+          { text: "يبرز التناقض والفرقة بين أبناء الشعب الواحد.", correct: false },
+          { text: "يبرز عجز الإنسان عن التكيف مع البيئات الجافة والمائية.", correct: false },
+          { text: "يبرز تفضيل ركوب البحر على العيش في الصحراء القاحلة.", correct: false }
+        ],
+        explanation: "الطباق في البيت العاشر: يبرز كفاح الأجداد ونضالهم وصمودهم."
+      }
+    ];
+
+    let remainingQuestions = [];
+    let score = 0;
+    let streak = 0;
+    let correctTotal = 0;
+    let wrongTotal = 0;
+    let currentQ = null;
+    let isSpinning = false;
+    let timerInterval = null;
+    let timeLeft = 35;
+
+    const sliceColors = [
+      '#1e40af', '#059669', '#d97706', '#7c3aed', '#dc2626',
+      '#0891b2', '#ea580c', '#4338ca', '#15803d', '#b91c1c',
+      '#0284c7', '#9333ea', '#c2410c'
+    ];
+
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    let currentAngle = 0;
+
+    function resizeCanvas() {
+      const wrap = document.querySelector('.wheel-outer-wrap');
+      if (wrap) {
+        const side = Math.min(wrap.clientWidth, 330);
+        canvas.width = side;
+        canvas.height = side;
+        drawWheel();
+      }
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 200));
+
+    function drawWheel() {
+      const numSlices = fullQuestions.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      const radius = canvas.width / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < numSlices; i++) {
+        const q = fullQuestions[i];
+        const isDone = !remainingQuestions.some(item => item.id === q.id);
+        const startA = currentAngle + i * sliceAngle;
+        const endA = startA + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius - 2, startA, endA);
+        ctx.closePath();
+
+        ctx.fillStyle = isDone ? '#334155' : sliceColors[i % sliceColors.length];
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#0f172a';
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(startA + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = isDone ? '#94a3b8' : '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        const label = isDone ? `س${q.id} (تم)` : `سؤال ${q.id}`;
+        ctx.fillText(label, radius - 14, 4);
+        ctx.restore();
+      }
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startGame() {
+      unlockAudio();
+      document.getElementById('startScreen').classList.remove('active');
+      document.getElementById('gameScreen').classList.add('active');
+      remainingQuestions = [...fullQuestions];
+      score = 0;
+      streak = 0;
+      correctTotal = 0;
+      wrongTotal = 0;
+      updateHeader();
+      resizeCanvas();
+    }
+
+    function updateHeader() {
+      document.getElementById('scoreVal').innerText = score;
+      document.getElementById('remainVal').innerText = remainingQuestions.length;
+      document.getElementById('streakVal').innerText = `${streak} 🔥`;
+    }
+
+    function spinWheel() {
+      if (isSpinning || remainingQuestions.length === 0) return;
+      unlockAudio();
+      isSpinning = true;
+      document.getElementById('spinBtn').disabled = true;
+
+      const randomRemainingIndex = Math.floor(Math.random() * remainingQuestions.length);
+      const chosenQuestion = remainingQuestions[randomRemainingIndex];
+      const targetOriginalIndex = fullQuestions.findIndex(q => q.id === chosenQuestion.id);
+
+      const numSlices = fullQuestions.length;
+      const sliceAngle = (2 * Math.PI) / numSlices;
+      const pointerAngle = 3 * Math.PI / 2;
+      const desiredAngleAtPointer = (targetOriginalIndex + 0.5) * sliceAngle;
+
+      const targetModulo = (pointerAngle - desiredAngleAtPointer) % (2 * Math.PI);
+      const normalizedTarget = (targetModulo + 2 * Math.PI) % (2 * Math.PI);
+
+      const currentMod = currentAngle % (2 * Math.PI);
+      const baseSpins = 4 * (2 * Math.PI);
+      const deltaAngle = baseSpins + ((normalizedTarget - currentMod + 2 * Math.PI) % (2 * Math.PI));
+
+      const startAngle = currentAngle;
+      const finalAngle = currentAngle + deltaAngle;
+      const startTime = performance.now();
+      const spinDuration = 3200;
+
+      function animateSpin(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        currentAngle = startAngle + (finalAngle - startAngle) * ease;
+
+        if (Math.random() < 0.15 && progress < 0.8) {
+          soundClick();
+        }
+
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          currentAngle = finalAngle;
+          drawWheel();
+          isSpinning = false;
+          setTimeout(() => {
+            showQuestion(chosenQuestion);
+          }, 350);
+        }
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    function showQuestion(question) {
+      currentQ = question;
+      document.getElementById('wheelContainer').style.display = 'none';
+      document.getElementById('quizContainer').style.display = 'block';
+
+      document.getElementById('qCategory').innerText = question.category;
+      document.getElementById('questionText').innerText = question.title;
+      
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      
+      const feedback = document.getElementById('feedbackBox');
+      feedback.style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'none';
+
+      const shuffledOptions = shuffleArray(question.options);
+      const letters = ['أ', 'ب', 'ج', 'د'];
+
+      shuffledOptions.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="opt-idx">${letters[idx]}</span><span>${opt.text}</span>`;
+        btn.onclick = () => handleSelectOption(opt, btn, shuffledOptions);
+        grid.appendChild(btn);
+      });
+
+      timeLeft = 35;
+      document.getElementById('timerBadge').innerText = `⏱️ ${timeLeft} ثانية`;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timerBadge').innerText = `⏱️ ${timeLeft} ثانية`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeOut(shuffledOptions);
+        }
+      }, 1000);
+    }
+
+    function handleSelectOption(selectedOpt, selectedBtn, allOpts) {
+      clearInterval(timerInterval);
+      const buttons = document.querySelectorAll('.opt-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      const feedback = document.getElementById('feedbackBox');
+      feedback.style.display = 'block';
+
+      if (selectedOpt.correct) {
+        selectedBtn.classList.add('correct');
+        soundCorrect();
+        streak++;
+        const pts = 100 + (streak * 15);
+        score += pts;
+        correctTotal++;
+        feedback.className = 'feedback-box correct';
+        feedback.innerHTML = `<strong> أحسنت! إجابة صحيحة (+${pts} نقطة):</strong><br>${currentQ.explanation}`;
+      } else {
+        selectedBtn.classList.add('wrong');
+        soundWrong();
+        streak = 0;
+        wrongTotal++;
+        feedback.className = 'feedback-box wrong';
+        buttons.forEach((b, i) => {
+          if (allOpts[i].correct) b.classList.add('correct');
+        });
+        feedback.innerHTML = `<strong> إجابة غير دقيقة!</strong><br>${currentQ.explanation}`;
+      }
+
+      remainingQuestions = remainingQuestions.filter(q => q.id !== currentQ.id);
+      updateHeader();
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    }
+
+    function handleTimeOut(allOpts) {
+      const buttons = document.querySelectorAll('.opt-btn');
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (allOpts[i].correct) b.classList.add('correct');
+      });
+      soundWrong();
+      streak = 0;
+      wrongTotal++;
+      const feedback = document.getElementById('feedbackBox');
+      feedback.style.display = 'block';
+      feedback.className = 'feedback-box wrong';
+      feedback.innerHTML = `<strong>⌛ انتهى الوقت!</strong><br>${currentQ.explanation}`;
+
+      remainingQuestions = remainingQuestions.filter(q => q.id !== currentQ.id);
+      updateHeader();
+      document.getElementById('nextBtn').style.display = 'inline-block';
+    }
+
+    function backToWheel() {
+      if (remainingQuestions.length === 0) {
+        showResults();
+        return;
+      }
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('wheelContainer').style.display = 'flex';
+      document.getElementById('spinBtn').disabled = false;
+      drawWheel();
+    }
+
+    function showResults() {
+      document.getElementById('gameScreen').classList.remove('active');
+      document.getElementById('endScreen').classList.add('active');
+
+      document.getElementById('finalScore').innerText = score;
+      document.getElementById('correctCount').innerText = correctTotal;
+      document.getElementById('wrongCount').innerText = wrongTotal;
+
+      const pct = Math.round((correctTotal / fullQuestions.length) * 100);
+      document.getElementById('accuracyPct').innerText = `${pct}%`;
+
+      const praise = document.getElementById('finalPraise');
+      if (pct >= 90) praise.innerText = "🌟 أداء عبقري ومتقن!";
+      else if (pct >= 70) praise.innerText = "👏 مستوى متميز جداً!";
+      else if (pct >= 50) praise.innerText = "👍 أداء جيد، واصل المراجعة!";
+      else praise.innerText = "💪 بحاجة لمزيد من التدريب.";
+    }
+
+    function restartGame() {
+      document.getElementById('endScreen').classList.remove('active');
+      document.getElementById('startScreen').classList.add('active');
+    }
+
+    document.getElementById('startBtn').onclick = startGame;
+    document.getElementById('spinBtn').onclick = spinWheel;
+    document.getElementById('nextBtn').onclick = backToWheel;
+    document.getElementById('restartBtn').onclick = restartGame;
+
+    window.onload = () => {
+      resizeCanvas();
+    };
+  </script>
+</body>
+</html>
